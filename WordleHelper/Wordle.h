@@ -6,13 +6,13 @@
 
 struct Word {
 	std::string word;
-	int priority;
+	int score;
 
 	bool operator> (const Word &a) const{
-		return priority > a.priority;
+		return score > a.score;
 	}
 	bool operator< (const Word& a) const {
-		return priority < a.priority;
+		return score < a.score;
 	}
 };
 
@@ -26,30 +26,30 @@ struct Character {
 };
 
 class Wordle {
-private:
-	std::string language;
-	int wordLength;
-
-	std::map<char, int> letterFrequency;
-
-	std::set<Character> correctCharacters;
-	std::set<Character> wrongCharacters;
-
-	std::vector<Word> possibleWords;
-	std::priority_queue<Word> possibleWordsSorted;
-
 public:
 	Wordle();
 	std::string GetBestWords();
 	void RegisterWord(const std::string &, const std::string &);
 
 private:
-	void ReadConfig();
+	void LoadConfig();
 	void LoadLetterFrequency();
-	void SaveDictionary();
+	void LoadDictionary();
 	void UpdateDictionary(const std::set<char> &);
 
 	bool IsAsciiWord(const std::string &);
 	std::string UnicodeToAscii(const std::u16string &);
 	int CalculatePriority(const std::string &);
+
+private:
+	std::string language;
+	uint8_t wordLength;
+
+	std::map<char, int> letterFrequency;
+
+	std::set<Character> correctCharacters;// green
+	std::set<Character> wrongCharacters;// yellow
+
+	std::vector<Word> possibleWords;
+	std::priority_queue<Word> possibleWordsSorted;
 };

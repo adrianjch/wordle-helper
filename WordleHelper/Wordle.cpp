@@ -1,33 +1,41 @@
-#include "Configuration.h"
+#include "Wordle.h"
 #include <string>
 #include <fstream>
 #include <iostream>
-#include <algorithm>
 #include <codecvt>
 
 Wordle::Wordle() {
-	ReadConfig();
+	LoadConfig();
 	LoadLetterFrequency();
-	SaveDictionary();
+	LoadDictionary();
 }
 
-void Wordle::ReadConfig() {
+void Wordle::LoadConfig() {
 	std::ifstream config("../config.txt");
 	if (!config.is_open()) {
 		return;
 	}
 
-	std::string aux;
-	std::getline(config, aux);
-	language = aux;
-	std::getline(config, aux);
-	wordLength = std::stoi(aux);
+	std::getline(config, language);
+	std::string wordLengthString;
+	std::getline(config, wordLengthString);
+	auto length = std::stoi(wordLengthString);
+	if (length >= 2 && length < 50)
+	{
+		wordLength = length;
+	}
+	else
+	{
+		std::cout << "Invalid configuration\n";
+	}
 }
 
 void Wordle::LoadLetterFrequency() {
 	std::ifstream lf("../Languages/" + language + ".lf");
 	if (!lf.is_open())
+	{
 		return;
+	}
 
 	std::string letter;
 	std::string frequency;
@@ -38,10 +46,12 @@ void Wordle::LoadLetterFrequency() {
 	lf.close();
 }
 
-void Wordle::SaveDictionary() {
+void Wordle::LoadDictionary() {
 	std::ifstream dictionary("../Languages/" + language + ".dic");
 	if (!dictionary.is_open())
+	{
 		return;
+	}
 
 	std::string word;
 	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
