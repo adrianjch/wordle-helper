@@ -2,6 +2,9 @@
 #include <filesystem>
 #include <iostream>
 
+#include "WordleGame.h"
+#include "WordleSolver.h"
+
 Frame::Frame(ImGuiIO* io)
     : io{ io }
 {
@@ -58,18 +61,18 @@ void Frame::ManageInputs()
 		ImWchar c = io->InputQueueCharacters[i];
 		if (std::isalpha(c))
 		{
-			currentWord += static_cast<char>(std::toupper(c));
+			game->AddCharacter(std::toupper(c));
 		}
-		else if (c == 8 && !currentWord.empty())
+		else if (c == 8)
 		{
-			currentWord.pop_back();
+			game->RemoveCharacter();
 		}
 	}
 }
 
 void Frame::ShowSettings()
 {
-	ImGui::BeginChild("languages_combo_child", ImVec2(220, 200), false);
+	ImGui::BeginChild("settings_child", ImVec2(220, 200), false);
 	// Text
 	ImGui::Text("Settings");
 	// Slider
@@ -96,9 +99,11 @@ void Frame::ShowSettings()
 	{
 		if (ImGui::Button("Start##languages_button"))
 		{
-			wordle = std::make_shared<Wordle>(availableLanguages[languageId], characters);
-			availableWords = wordle->GetBestWords(200);
-			totalWords = wordle->GetTotalWords();
+			solver = std::make_shared<WordleSolver>(availableLanguages[languageId], characters);
+			game = std::make_shared<WordleGame>(characters);
+			availableWords = solver->GetBestWords(200);
+			totalWords = solver->GetTotalWords();
+			game->AddAttempt(true);
 			started = true;
 		}
 	}
@@ -108,20 +113,17 @@ void Frame::ShowSettings()
 void Frame::ShowSimulation()
 {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(160, 400));
-	ImGui::Text("%s", currentWord.c_str());
-	static bool changed = false;
-	ImGui::PushStyleColor(ImGuiCol_Button, changed ? ImVec4(1, 1, 0, 0.5f) : ImVec4(0, 1, 0, 0.5f));
-	for (int i = 0; i < 5; i++)
+	// First window
+	game->DrawBoard();
+	if (ImGui::Button("Submit"))
 	{
-		std::string label = " " + std::to_string(i) + " ##word_button";
-		if (ImGui::Button(label.c_str()))
-		{
-			changed = !changed;
-		}
-		ImGui::SameLine();
+		solver->RegisterWord(game->GetLastWord(), game->GetLastResult());
+		// TODO this is repeated, move to function
+		availableWords = solver->GetBestWords(200);
+		totalWords = solver->GetTotalWords();
+		game->AddAttempt(true);
 	}
-	ImGui::PopStyleColor();
-	// New window
+	// Second window
 	std::string title = "Words list (" + std::to_string(totalWords) + " words)" + "###words";
 	ImGui::Begin(title.c_str(), nullptr, ImGuiWindowFlags_NoCollapse);
 	if (ImGui::BeginTable("table1", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
@@ -129,7 +131,7 @@ void Frame::ShowSimulation()
 		ImGui::TableSetupColumn("Word", ImGuiTableColumnFlags_WidthStretch, 0.7f);
 		ImGui::TableSetupColumn("Score", ImGuiTableColumnFlags_WidthStretch, 0.3f);
 		ImGui::TableHeadersRow();
-		
+
 		for (auto word : availableWords)
 		{
 			ImGui::TableNextRow();
@@ -139,6 +141,10 @@ void Frame::ShowSimulation()
 			ImGui::Text("%d", word.score);
 		}
 		ImGui::EndTable();
+	}
+	if (availableWords.empty())
+	{
+		ImGui::TextWrapped("No word was found with those parameters");
 	}
 	ImGui::End();
 	ImGui::PopStyleVar();

@@ -151,7 +151,9 @@
     <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
-    <ClCompile Include="Wordle.cpp" />
+    <ClCompile Include="WordleAttemp.cpp" />
+    <ClCompile Include="WordleGame.cpp" />
+    <ClCompile Include="WordleSolver.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -164,7 +166,9 @@
     <ClInclude Include="imgui\imstb_rectpack.h" />
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
-    <ClInclude Include="Wordle.h" />
+    <ClInclude Include="WordleAttempt.h" />
+    <ClInclude Include="WordleGame.h" />
+    <ClInclude Include="WordleSolver.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

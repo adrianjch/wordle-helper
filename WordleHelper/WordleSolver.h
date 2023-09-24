@@ -30,14 +30,14 @@ struct Character
 	}
 };
 
-class Wordle
+class WordleSolver
 {
 public:
-	Wordle(const std::string& lang, int length);
+	WordleSolver(const std::string& lang, int length);
 	
 	std::vector<Word> GetBestWords(int size);
 	int GetTotalWords();
-	void RegisterWord(const std::string &, const std::string &);
+	void RegisterWord(std::string word, std::vector<int> result);
 
 private:
 	void LoadLetterFrequency();

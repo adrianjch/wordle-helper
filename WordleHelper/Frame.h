@@ -1,8 +1,12 @@
 #pragma once
 #include <memory>
-
+#include <string>
+#include <vector>
 #include "imgui.h"
-#include "Wordle.h"
+#include "WordleSolver.h"
+
+class WordleGame;
+class WordleSolver;
 
 class Frame
 {
@@ -23,12 +27,12 @@ private:
     ImVec4 clearColor;
 
     // Phase 1
-    std::shared_ptr<Wordle> wordle;
+    std::shared_ptr<WordleSolver> solver;
+    std::shared_ptr<WordleGame> game;
     std::vector<std::string> availableLanguages;
     bool started { false };
     // Phase 2
     std::vector<Word> availableWords;
     int totalWords;
-    std::string currentWord;
 };
 #pragma once

@@ -1,18 +1,18 @@
 #define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
-#include "Wordle.h"
+#include "WordleSolver.h"
 #include <string>
 #include <fstream>
 #include <iostream>
 #include <codecvt>
 
-Wordle::Wordle(const std::string& lang, int length)
+WordleSolver::WordleSolver(const std::string& lang, int length)
 	: language{ lang }, wordLength{ length }
 {
 	LoadLetterFrequency();
 	LoadDictionary();
 }
 
-void Wordle::LoadLetterFrequency()
+void WordleSolver::LoadLetterFrequency()
 {
 	std::ifstream lf("../Languages/" + language + ".lf");
 	if (!lf.is_open())
@@ -30,7 +30,7 @@ void Wordle::LoadLetterFrequency()
 	lf.close();
 }
 
-void Wordle::LoadDictionary()
+void WordleSolver::LoadDictionary()
 {
 	std::ifstream dictionary("../Languages/" + language + ".dic");
 	if (!dictionary.is_open())
@@ -56,7 +56,7 @@ void Wordle::LoadDictionary()
 	std::cout << "Dictionary loaded\n";
 }
 
-void Wordle::UpdateDictionary(const std::set<char> &bannedCharacters)
+void WordleSolver::UpdateDictionary(const std::set<char> &bannedCharacters)
 {
 	std::vector<Word> auxVector;
 	// Remove words with banned characters (gray characters)
@@ -121,7 +121,7 @@ void Wordle::UpdateDictionary(const std::set<char> &bannedCharacters)
 	possibleWordsSorted = auxQueue;
 }
 
-bool Wordle::IsAsciiWord(const std::string &str)
+bool WordleSolver::IsAsciiWord(const std::string &str)
 {
 	for (auto c : str) {
 		if (c < 0) {
@@ -131,7 +131,7 @@ bool Wordle::IsAsciiWord(const std::string &str)
 	return true;
 }
 
-std::string Wordle::UnicodeToAscii(const std::u16string& str)
+std::string WordleSolver::UnicodeToAscii(const std::u16string& str)
 {
 	std::string aux = "";
 	for (auto c : str)
@@ -197,7 +197,7 @@ std::string Wordle::UnicodeToAscii(const std::u16string& str)
 	return aux;
 }
 
-int Wordle::CalculatePriority(const std::string &str)
+int WordleSolver::CalculatePriority(const std::string &str)
 {
 	std::set<char> usedLetters;
 	int sum = 0;
@@ -212,8 +212,13 @@ int Wordle::CalculatePriority(const std::string &str)
 	return sum;
 }
 
-std::vector<Word> Wordle::GetBestWords(int size)
+std::vector<Word> WordleSolver::GetBestWords(int size)
 {
+	if (possibleWordsSorted.empty())
+	{
+		return {};
+	}
+
 	std::vector<Word> ret;
 	ret.reserve(size);
 	std::priority_queue<Word> aux = possibleWordsSorted;
@@ -229,25 +234,26 @@ std::vector<Word> Wordle::GetBestWords(int size)
 	return ret;
 }
 
-int Wordle::GetTotalWords()
+int WordleSolver::GetTotalWords()
 {
 	return possibleWords.size();
 }
 
-void Wordle::RegisterWord(const std::string &word, const std::string& output)
+void WordleSolver::RegisterWord(std::string word, std::vector<int> result)
 {
+	std::transform(word.begin(), word.end(), word.begin(), ::tolower);
 	std::set<char> bannedCharacters;
-	for (int i = 0; i < output.size(); i++)
+	for (int i = 0; i < result.size(); i++)
 	{
-		if (output[i] == '0')
+		if (result[i] == 0)
 		{
 			bannedCharacters.insert(word[i]);
 		}
-		else if (output[i] == '1')
+		else if (result[i] == 1)
 		{
 			wrongCharacters.insert({ word[i], i });
 		}
-		else if (output[i] == '2')
+		else if (result[i] == 2)
 		{
 			correctCharacters.insert({ word[i], i });
 		}
