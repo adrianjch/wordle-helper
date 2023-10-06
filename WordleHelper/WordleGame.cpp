@@ -1,5 +1,8 @@
 #include "WordleGame.h"
 
+#include "Constants.h"
+#include "Utilities.h"
+
 WordleGame::WordleGame(int length)
 	: wordLength{ length }
 {
@@ -31,10 +34,10 @@ void WordleGame::DrawBoard()
 	for (int i = 0; i < attempts.size(); i++)
 	{
 		// Creating child as a zone for the right click popup
-		auto label = "attempt" + std::to_string(i) + "_child";
-		ImGui::BeginChild(label.c_str(), ImVec2(0, 30+3));
+		auto label = ReplaceString(ATTEMPT_CHILD_LABEL, ATTEMPT_LABEL_ID, std::to_string(i));
+		ImGui::BeginChild(label.c_str(), ATTEMPT_CHILD_SIZE);
 		// Radio button (selection)
-		label = "###attempt_radioButton" + std::to_string(i);
+		label = ReplaceString(ATTEMPT_RADIO_LABEL, ATTEMPT_LABEL_ID, std::to_string(i));
 		ImGui::RadioButton(label.c_str(), &selectedAttempt, i);
 		ImGui::SameLine();
 		// Attempt
@@ -45,17 +48,17 @@ void WordleGame::DrawBoard()
 		{
 			break;
 		}
-		label = "Remove attempt popup##" + std::to_string(i);
+		label = ReplaceString(ATTEMPT_POPUP_LABEL, ATTEMPT_LABEL_ID, std::to_string(i));
 		if (ImGui::BeginPopupContextItem(label.c_str()))
 		{
-			ImGui::Text("Are you sure you want to remove this item?");
-			if (ImGui::Button("Yes##removeAttempt_button"))
+			ImGui::Text(ATTEMPT_POPUP_TEXT);
+			if (ImGui::Button(ATTEMPT_POPUP_LABEL_YES))
 			{
 				removedId = i;
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::SameLine();
-			if (ImGui::Button("No##removeAttempt_button"))
+			if (ImGui::Button(ATTEMPT_POPUP_LABEL_NO))
 			{
 				ImGui::CloseCurrentPopup();
 			}

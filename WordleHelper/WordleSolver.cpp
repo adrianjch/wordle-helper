@@ -5,6 +5,8 @@
 #include <iostream>
 #include <codecvt>
 
+#include "Constants.h"
+
 WordleSolver::WordleSolver(const std::string& lang, int length)
 	: language{ lang }, wordLength{ length }
 {
@@ -14,7 +16,7 @@ WordleSolver::WordleSolver(const std::string& lang, int length)
 
 void WordleSolver::LoadLetterFrequency()
 {
-	std::ifstream lf("../Languages/" + language + ".lf");
+	std::ifstream lf(LANGUAGES_PATH + language + LETTER_FREQUENCY_FILE_EXTENSION);
 	if (!lf.is_open())
 	{
 		return;
@@ -32,7 +34,7 @@ void WordleSolver::LoadLetterFrequency()
 
 void WordleSolver::LoadDictionary()
 {
-	std::ifstream dictionary("../Languages/" + language + ".dic");
+	std::ifstream dictionary(LANGUAGES_PATH + language + DICTIONARY_FILE_EXTENSION);
 	if (!dictionary.is_open())
 	{
 		return;

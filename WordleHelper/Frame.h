@@ -23,7 +23,6 @@ private:
 
 private:
     ImGuiIO* io;
-    bool showDemoWindow;
     ImVec4 clearColor;
 
     // Phase 1

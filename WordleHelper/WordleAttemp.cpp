@@ -1,16 +1,18 @@
 #include "WordleAttempt.h"
+#include "Constants.h"
+#include "Utilities.h"
 
 WordleAttempt::WordleAttempt(int length, int id)
 	: wordLength{ length }, id{ id }
 {
-	colors[0] = ImVec4(0.3f, 0.3f, 0.3f, 0.5f);
-	colors[1] = ImVec4(1, 1, 0, 0.5f);
-	colors[2] = ImVec4(0, 1, 0, 0.5f);
+	colors[0] = ATTEMPT_GRAY;
+	colors[1] = ATTEMPT_YELLOW;
+	colors[2] = ATTEMPT_GREEN;
 
 	boxes.reserve(length);
 	for (int i = 0; i < length; i++)
 	{
-		boxes.emplace_back('_');
+		boxes.emplace_back(ATTEMPT_PLACEHOLDER_CHARACTER);
 	}
 }
 
@@ -33,7 +35,7 @@ void WordleAttempt::RemoveCharacter()
 	}
 
 	word.pop_back();
-	boxes[word.size()].c = '_';
+	boxes[word.size()].c = ATTEMPT_PLACEHOLDER_CHARACTER;
 }
 
 void WordleAttempt::DrawAttempt()
@@ -44,14 +46,15 @@ void WordleAttempt::DrawAttempt()
 		ImGui::PushStyleColor(ImGuiCol_Button, color);
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, color);
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, color);
-		std::string label;
-		label += boxes[i].c;
-		label += "###attempt" + std::to_string(id) + "_button" + std::to_string(i);
-		if (ImGui::Button(label.c_str(), ImVec2(30,30)))
+		
+		auto label = ReplaceString(ATTEMPT_BUTTON_LABEL, ATTEMPT_CHARACTER_LABEL_ID, std::string(1, boxes[i].c));
+		label = ReplaceString(label, ATTEMPT_LABEL_ID, std::to_string(id));
+		label = ReplaceString(label, ATTEMPT_BUTTON_LABEL_ID, std::to_string(i));
+		if (ImGui::Button(label.c_str(), ATTEMPT_BUTTON_SIZE))
 		{
 			boxes[i].type = (boxes[i].type + 1) % 3;
 		}
-		ImGui::PopStyleColor(3);
+		ImGui::PopStyleColor(3);//ImGuiCol_Button + ImGuiCol_ButtonHovered + ImGuiCol_ButtonActive
 
 		if (i < boxes.size()-1)
 		{

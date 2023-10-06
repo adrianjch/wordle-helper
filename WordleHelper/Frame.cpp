@@ -2,18 +2,19 @@
 #include <filesystem>
 #include <iostream>
 
+#include "Constants.h"
+#include "Utilities.h"
 #include "WordleGame.h"
 #include "WordleSolver.h"
 
 Frame::Frame(ImGuiIO* io)
     : io{ io }
 {
-    showDemoWindow = false;
-    clearColor = { 0.45f, 0.55f, 0.60f, 1.00f };
+    clearColor = BACKGROUND_COLOR;
     
-    for (const auto& entry : std::filesystem::directory_iterator("../Languages"))
+    for (const auto& entry : std::filesystem::directory_iterator(LANGUAGES_PATH))
     {
-        if (entry.path().extension() == ".lf")
+        if (entry.path().extension() == LETTER_FREQUENCY_FILE_EXTENSION)
         {
             availableLanguages.push_back(entry.path().stem().string());
         }
@@ -25,15 +26,11 @@ void Frame::Update()
     ImGui::NewFrame();
 	ManageInputs();
 
-    if (showDemoWindow)
-        ImGui::ShowDemoWindow(&showDemoWindow);
-
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse;
     // Main panel
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(160, 150));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, MAIN_PANEL_MIN_SIZE);
     {
-	    ImGui::Begin("Main pannel", nullptr, flags);
-	    ImGui::Checkbox("Demo Window", &showDemoWindow);
+	    ImGui::Begin(MAIN_PANEL_NAME, nullptr, flags);
         if (!started)
         {
 			ShowSettings();
@@ -72,16 +69,16 @@ void Frame::ManageInputs()
 
 void Frame::ShowSettings()
 {
-	ImGui::BeginChild("settings_child", ImVec2(220, 200), false);
+	ImGui::BeginChild(SETTINGS_CHILD_LABEL, SETTINGS_CHILD_SIZE, false);
 	// Text
-	ImGui::Text("Settings");
+	ImGui::Text(SETTINGS_TITLE);
 	// Slider
-	static int characters = 5;
-	ImGui::SliderInt("##characters_slider", &characters, 2, 15, "%d characters", ImGuiSliderFlags_NoInput);
+	static int characters = DEFAULT_WORD_LENGTH;
+	ImGui::SliderInt(WORD_LENGTH_SLIDER_LABEL, &characters, MIN_WORD_LENGTH, MAX_WORD_LENGTH, "%d characters", ImGuiSliderFlags_NoInput);
 	// Dropdown
 	static int languageId = -1;
-	std::string preview = (languageId == -1) ? "Select language" : availableLanguages[languageId];
-	if (ImGui::BeginCombo("##languages_combo", preview.c_str()))
+	std::string preview = (languageId == -1) ? LANGUAGES_COMBO_PREVIEW : availableLanguages[languageId];
+	if (ImGui::BeginCombo(LANGUAGES_COMBO_LABEL, preview.c_str()))
 	{
 		for (int i = 0; i < availableLanguages.size(); i++)
 		{
@@ -97,11 +94,11 @@ void Frame::ShowSettings()
 	// Button
 	if (languageId != -1)
 	{
-		if (ImGui::Button("Start##languages_button"))
+		if (ImGui::Button(START_BUTTON_LABEL))
 		{
 			solver = std::make_shared<WordleSolver>(availableLanguages[languageId], characters);
 			game = std::make_shared<WordleGame>(characters);
-			availableWords = solver->GetBestWords(200);
+			availableWords = solver->GetBestWords(MAX_WORDS);
 			totalWords = solver->GetTotalWords();
 			game->AddAttempt(true);
 			started = true;
@@ -112,24 +109,24 @@ void Frame::ShowSettings()
 
 void Frame::ShowSimulation()
 {
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(160, 400));
 	// First window
 	game->DrawBoard();
 	if (ImGui::Button("Submit"))
 	{
 		solver->RegisterWord(game->GetLastWord(), game->GetLastResult());
 		// TODO this is repeated, move to function
-		availableWords = solver->GetBestWords(200);
+		availableWords = solver->GetBestWords(MAX_WORDS);
 		totalWords = solver->GetTotalWords();
 		game->AddAttempt(true);
 	}
 	// Second window
-	std::string title = "Words list (" + std::to_string(totalWords) + " words)" + "###words";
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, SECONDARY_PANEL_MIN_SIZE);
+	auto title = ReplaceString(SECONDARY_PANEL_NAME, TOTAL_WORDS_LABEL_ID, std::to_string(totalWords));
 	ImGui::Begin(title.c_str(), nullptr, ImGuiWindowFlags_NoCollapse);
-	if (ImGui::BeginTable("table1", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
+	if (ImGui::BeginTable(WORDS_TABLE_LABEL, 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
 	{
-		ImGui::TableSetupColumn("Word", ImGuiTableColumnFlags_WidthStretch, 0.7f);
-		ImGui::TableSetupColumn("Score", ImGuiTableColumnFlags_WidthStretch, 0.3f);
+		ImGui::TableSetupColumn("Word", ImGuiTableColumnFlags_WidthStretch, TABLE_WORD_RELATIVE_WIDTH);
+		ImGui::TableSetupColumn("Score", ImGuiTableColumnFlags_WidthStretch, TABLE_SCORE_RELATIVE_WIDTH);
 		ImGui::TableHeadersRow();
 
 		for (auto word : availableWords)
@@ -144,7 +141,7 @@ void Frame::ShowSimulation()
 	}
 	if (availableWords.empty())
 	{
-		ImGui::TextWrapped("No word was found with those parameters");
+		ImGui::TextWrapped(NO_AVAILABLE_WORDS_TEXT);
 	}
 	ImGui::End();
 	ImGui::PopStyleVar();
