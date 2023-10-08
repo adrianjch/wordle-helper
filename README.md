@@ -8,11 +8,22 @@ This tool is a wordle helper. It uses a dictionary and letter frequency to deter
 ---
 
 ### HOW TO USE
+#### OLD
 - First of all, open config.txt and change the language to the one you want to (must have a .dic and .lf file inside Languages folder) and set the amount of letters the words will have
 - When you run the code, it will prompt you with the best 5 possible answers. Once you have chosen your word into Wordle, you will have to input the word you chose. Then it will ask you for the result. 0 = letter is not in the word; 1 = letter is not in the correct index; 2 = letter is in the correct index. Then it will prompt you again with the new best possible answers
 <p align="center">
-  <img src="./img/example.png" width="500"/></center>
+  <img src="./img/example-old.png" width="500"/></center>
 </p>
+
+#### NEW
+- Run the code, select the correct settings and start the game!
+- A list of available words will show, it is sorted with an internal score based on the letter frequency
+- Type the word you chose, click on the boxes to change their color and submit
+- Repeat
+<p align="center">
+  <img src="./img/example-new.png" width="500"/></center>
+</p>
+
 
 ---
 
